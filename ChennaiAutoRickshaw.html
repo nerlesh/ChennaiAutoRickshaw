@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Distance between Two Places</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+     <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAA7j_Q-rshuWkc8HyFI4V2HxQYPm-xtd00hTQOC0OXpAMO40FHAxT29dNBGfxqMPq5zwdeiDSHEPL89A" type="text/javascript"></script>
+     <script type="text/javascript">
+
+	 function calculateDistances() {
+  origin = document.forms[0].address1.value; //Get the source string
+  destination = document.forms[0].address2.value; //Get the destination string
+  var service = new google.maps.DistanceMatrixService(); //initialize the distance service
+  service.getDistanceMatrix(
+    {
+      origins: [origin], //set origin, you can specify multiple sources here
+      destinations: [destination],//set destination, you can specify multiple destinations here
+      travelMode: google.maps.TravelMode.DRIVING, //set the travelmode
+      unitSystem: google.maps.UnitSystem.METRIC,//The unit system to use when displaying distance
+      avoidHighways: false,
+      avoidTolls: false
+    }, calcDistance); // here calcDistance is the call back function
+}
+
+function calcDistance(response, status) {
+  if (status != google.maps.DistanceMatrixStatus.OK) { // check if there is valid result
+    alert('Error was: ' + status);
+  } else {
+    var origins = response.originAddresses;
+    var destinations = response.destinationAddresses;
+  
+
+    for (var i = 0; i < origins.length; i++) {
+      var results = response.rows[i].elements;
+
+      for (var j = 0; j < results.length; j++) {
+
+        alert ('Distance from '+origins[i] + ' to ' + destinations[j]
+            + ': ' + results[j].distance.text ); // alert the result
+      }
+    }
+  }
+}
+	 
+	 
+    var geocoder, location1, location2;
+
+    function initialize() {
+        geocoder = new GClientGeocoder();
+    }
+
+   
+
+	
+
+    </script>
+  </head>
+  <body onload="initialize()">
+    
+    <form action="#" onsubmit="calculateDistances(); return false;">  
+	<div id="main" style="background-color:grey">
+	<table align="center"> 
+	<tr>
+	<td>
+	From
+	</td>
+	</tr>
+	<tr>
+	<td>	
+	<input id="geocomplete2" type="text" name="address1" placeholder="Type in an address" size="40" />
+    </td>
+	</tr>
+	<tr>
+	<td>
+	 To
+	</td>
+	</tr>
+	<tr>
+	<td>
+	 <input id="geocomplete1" type="text" name="address2" placeholder="Type in an address" size="40" />
+    </td>
+	</tr>
+	<tr>
+	<td align="center">
+	 <br/>
+	 <input type="submit" name="find" value="Calculate Distance" size="40" />
+    </td>
+	</tr>
+	</table>
+	</div>
+	</form>
+    
+   <p id="results"></p>
+    
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+
+    <script src="jquery.geocomplete.js"></script>
+   
+    
+    <script>
+      $(function(){
+        
+        $("#geocomplete2").geocomplete()
+          .bind("geocode:result", function(event, result){
+            $.log("Result: " + result.formatted_address);
+          })
+          .bind("geocode:error", function(event, status){
+            $.log("ERROR: " + status);
+          })
+          .bind("geocode:multiple", function(event, results){
+            $.log("Multiple: " + results.length + " results found");
+          });
+          
+          $("#geocomplete1").geocomplete()
+          .bind("geocode:result", function(event, result){
+            $.log("Result: " + result.formatted_address);
+          })
+          .bind("geocode:error", function(event, status){
+            $.log("ERROR: " + status);
+          })
+          .bind("geocode:multiple", function(event, results){
+            $.log("Multiple: " + results.length + " results found");
+          });
+        
+        $("#find").click(function(){
+          $("#geocomplete").trigger("geocode");
+        });
+        
+        
+        $("#examples a").click(function(){
+          $("#geocomplete").val($(this).text()).trigger("geocode");
+          return false;
+        });
+        
+      });
+	  function autoResizeDiv()
+        {
+            document.getElementById('main').style.height = window.innerHeight +'px';
+        }
+        window.onresize = autoResizeDiv;
+        autoResizeDiv();
+    </script>
+  </body>
+</html>
+
