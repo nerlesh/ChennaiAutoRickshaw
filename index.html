@@ -4,12 +4,59 @@
     <title>Distance between Two Places</title>
     <meta charset="UTF-8">
     <link rel="stylesheet" type="text/css" href="styles.css" />
+    <link rel="stylesheet" href="jquery.mobile-1.4.0.min.css">
+	<link rel="shortcut icon" href="../favicon.ico">
+	<script src="jquery.js"></script>
+	<script src="jquery.mobile-1.4.0.min.js"></script>
      <script src="http://maps.google.com/maps?file=api&v=2&key=ABQIAAAA7j_Q-rshuWkc8HyFI4V2HxQYPm-xtd00hTQOC0OXpAMO40FHAxT29dNBGfxqMPq5zwdeiDSHEPL89A" type="text/javascript"></script>
      <script type="text/javascript">
+     
+     $( document ).on( "pagecreate", function() {
+			$( "#theme-selector input" ).on( "change", function( event ) {
+				var themeClass = $( "#theme-selector input:checked" ).attr( "id" );
+
+				$( "#testpage" ).removeClass( "ui-page-theme-a ui-page-theme-b" ).addClass( "ui-page-theme-" + themeClass );
+				$( "#ui-body-test" ).removeClass( "ui-body-a ui-body-b" ).addClass( "ui-body-" + themeClass );
+				$( "#ui-bar-test, #ui-bar-form" ).removeClass( "ui-bar-a ui-bar-b" ).addClass( "ui-bar-" + themeClass );
+				$( ".ui-collapsible-content" ).removeClass( "ui-body-a ui-body-b" ).addClass( "ui-body-" + themeClass );
+				$( ".theme" ).text( themeClass );
+			});
+			$( "#opt-shadow input" ).on( "change", function( event ) {
+				if ( $( "#on" ).prop( "checked" ) ) {
+					$( "#testpage" ).removeClass( "noshadow" );
+				} else if ( $( "#off" ).prop( "checked" ) ) {
+					$( "#testpage" ).addClass( "noshadow" );
+				}
+			});
+			$( "#opt-iconshadow input" ).on( "change", function( event ) {
+				if ( $( "#off1" ).prop( "checked" ) ) {
+					$( "#testpage" ).removeClass( "ui-shadow-icon" );
+				} else if ( $( "#on1" ).prop( "checked" ) ) {
+					$( "#testpage" ).addClass( "ui-shadow-icon" );
+				}
+			});
+			$( "#opt-navbars input" ).on( "change", function( event ) {
+				if ( $( "#show" ).prop( "checked" ) ) {
+					$( "#testpage .ui-navbar" ).show();
+					$( "#testpage .ui-footer h4" ).hide();
+				} else if ( $( "#hide" ).prop( "checked" ) ) {
+					$( "#testpage .ui-navbar" ).hide();
+					$( "#testpage .ui-footer h4" ).show();
+				}
+			});
+		});
 
 	 function calculateDistances() {
+	 
   origin = document.forms[0].address1.value; //Get the source string
   destination = document.forms[0].address2.value; //Get the destination string
+  if(origin==null || origin==''){
+  alert("Please Enter From Address");
+  return;
+  }else if(destination==null || destination==''){
+   alert("Please Enter To Address");
+   return;
+  }
   var service = new google.maps.DistanceMatrixService(); //initialize the distance service
   service.getDistanceMatrix(
     {
@@ -28,15 +75,48 @@ function calcDistance(response, status) {
   } else {
     var origins = response.originAddresses;
     var destinations = response.destinationAddresses;
-  
+   var result ='';
 
     for (var i = 0; i < origins.length; i++) {
       var results = response.rows[i].elements;
 
       for (var j = 0; j < results.length; j++) {
 
-        alert ('Distance from '+origins[i] + ' to ' + destinations[j]
-            + ': ' + results[j].distance.text ); // alert the result
+       // alert ('Distance from '+origins[i] + ' to ' + destinations[j]
+         //   + ': ' + results[j].distance.text ); // alert the result
+		//	var dist= results[j].distance.text ;
+
+		//	dist = dist.replace('km','');
+			/*var totalDayFare ;
+			var totalnightFare;
+			if(parseFloat(dist.trim())==1.8){
+			alert("hai");
+			
+			}*/
+			var dayCost ;
+			var nightCost;
+			if(parseFloat(dist.trim())<=1.8){
+			dayCost = 25;
+			nightCost = ((parseFloat(dayCost) * 50)/100) + dayCost ;
+			nightCost=Math.round(nightCost);
+			}else if(parseFloat(dist.trim())>=100){
+			alert("Your Distance is too Far Please take Taxi");
+			}
+			else{
+			dist=(parseFloat(dist.trim())-1.8);
+			dist=Math.abs(dist);
+			//dist=Math.ceil(parseFloat(dist));
+			 dayCost = ( parseFloat(dist) * 12 ) + 25;
+			 nightCost = ((parseFloat(dayCost) * 50)/100) + dayCost ;
+			 	dayCost=Math.round(dayCost);
+			 		nightCost=Math.round(nightCost);
+			}
+			result +='<div><center><table id="Result"><th>Day Fare(in Rupees)</th><th>Night Fare(in Rupees)</th>';
+			result += '<tr><td>'+ dayCost + '</td>' + '<td>' + nightCost + '</td></tr>';
+			result+='</table></center></div>';
+			
+			
+			$('#resultFare').html(result);
       }
     }
   }
@@ -56,42 +136,29 @@ function calcDistance(response, status) {
     </script>
   </head>
   <body onload="initialize()">
-    
+  <div data-role="header">
+  <h1>Chennai Auto Rickshaw Fare</h2>
+  </div>
     <form action="#" onsubmit="calculateDistances(); return false;">  
-	<div id="main" style="background-color:grey">
-	<table align="center"> 
-	<tr>
-	<td>
-	From
-	</td>
+    <table>
+    <tr>
+	<td>From :</td><td><input id="geocomplete2" type="text" name="address1" placeholder="Type in an address" size="90" /></td>
 	</tr>
 	<tr>
-	<td>	
-	<input id="geocomplete2" type="text" name="address1" placeholder="Type in an address" size="40" />
-    </td>
-	</tr>
-	<tr>
-	<td>
-	 To
-	</td>
-	</tr>
-	<tr>
-	<td>
-	 <input id="geocomplete1" type="text" name="address2" placeholder="Type in an address" size="40" />
-    </td>
-	</tr>
-	<tr>
-	<td align="center">
-	 <br/>
-	 <input type="submit" name="find" value="Calculate Distance" size="40" />
-    </td>
-	</tr>
-	</table>
-	</div>
-	</form>
+      <td>To :</td> <td><input id="geocomplete1" type="text" name="address2" placeholder="Type in an address" size="90" /></td>
+     </tr>
+     </table>
+     <input type="submit" name="find" value="Get Fare" />
+     </table>
+    </form>
     
    <p id="results"></p>
-    
+    	<div id="resultFare">
+		
+		</div>
+		<div id="note">
+		
+		</div>
     <script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places"></script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 
@@ -134,12 +201,6 @@ function calcDistance(response, status) {
         });
         
       });
-	  function autoResizeDiv()
-        {
-            document.getElementById('main').style.height = window.innerHeight +'px';
-        }
-        window.onresize = autoResizeDiv;
-        autoResizeDiv();
     </script>
   </body>
 </html>
